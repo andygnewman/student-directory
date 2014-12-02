@@ -23,3 +23,7 @@ puts "Gus Powell"
 puts "Jake Alvarez"
 puts "Hannah Carney"
 puts "Bibiana Cristofol"
+
+print "Overall we have "
+print 23
+puts " great students"
