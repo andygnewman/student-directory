@@ -1,9 +1,21 @@
 @students = []
 
+def try_load_students
+	filename = ARGV.first # first argument passed from the command line
+	return if filename.nil? # exits out of method if no argument passed
+	if File.exists?(filename)
+		load_students(filename)
+		puts "Loaded #{@students.length} records from #{filename}"
+	else
+		puts "Sorry #{filename} doesn't exist."
+		exit
+	end
+end
+
 def interactive_menu
 	loop do
 		print_menu # 1. print the menu and ask for user input
-		process(gets.chomp) # 2. read the input invoke method process on the input
+		process(STDIN.gets.chomp) # 2. read the input invoke method process on the input
 	end
 end
 
@@ -56,20 +68,20 @@ end
 def input_students
 	puts "Please enter the names of the students"
 	puts "To finish, just hit return twice!"
-	name = gets.chomp
+	name = STDIN.gets.chomp
 	while !name.empty? do
 	#add the student name in a hash within the array including cohort (hardcoded)
 	@students << {:name => name, :cohort => :december}
 	puts "You have entered #{@students.length} student names"
 	#get next name from the user
-	name = gets.chomp
+	name = STDIN.gets.chomp
 	end
 	#return the array of students for use when method is called
 	@students
 end 
 
-def load_students
-	file = File.open("students.csv","r")
+def load_students(filename = "students.csv")
+	file = File.open(filename,"r")
 	file.readlines.each do |line|
 		name, cohort = line.chomp.split(",")
 		@students << {:name => name, :cohort => cohort.to_sym}
@@ -89,4 +101,5 @@ end
 file.close
 end
 
+try_load_students
 interactive_menu
