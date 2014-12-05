@@ -1,3 +1,4 @@
+require 'csv'
 @students = []
 
 def try_load_students
@@ -14,33 +15,27 @@ end
 
 def interactive_menu
 	loop do
-		print_menu # 1. print the menu and ask for user input
-		process(STDIN.gets.chomp) # 2. read the input invoke method process on the input
+		print_menu 
+		process(STDIN.gets.chomp) 
 	end
 end
 
 def print_menu
 	puts "1. Input the students"
 	puts "2. Show the students"
-	puts "3. Save students to students.csv"
-	puts "4. Load students from students.csv"
+	puts "3. Save students to csv file"
+	puts "4. Load students from csv file"
 	puts "9. Exit"
 end
 
 def process(selection)
 	case selection
-		when "1" # input the students
-			input_students 
-		when "2" # show the students
-			show_students
-		when "3" # save students
-			save_students
-		when "4" # load students
-			load_students
-		when "9"
-			exit 
-		else
-			puts "I don't know what you mean, please try again."
+		when "1" then input_students 
+		when "2" then show_students 
+		when "3" then save_students 
+		when "4" then load_students 
+		when "9" then exit
+		else puts "I don't know what you mean, please try again."		
 	end
 end
 
@@ -68,37 +63,48 @@ end
 def input_students
 	puts "Please enter the names of the students"
 	puts "To finish, just hit return twice!"
-	name = STDIN.gets.chomp
-	while !name.empty? do
-	#add the student name in a hash within the array including cohort (hardcoded)
-	@students << {:name => name, :cohort => :december}
+	capture_name
+	while !@name.empty? do
+	add_students(@name, cohort = "december")
 	puts "You have entered #{@students.length} student names"
-	#get next name from the user
-	name = STDIN.gets.chomp
+	capture_name
 	end
-	#return the array of students for use when method is called
 	@students
 end 
 
-def load_students(filename = "students.csv")
-	file = File.open(filename,"r")
-	file.readlines.each do |line|
-		name, cohort = line.chomp.split(",")
-		@students << {:name => name, :cohort => cohort.to_sym}
+def capture_name
+	@name = STDIN.gets.chomp
+end
+
+def get_filename
+	filename = "students.csv"
+	puts "What filename would you like to use"
+	puts "just hit enter to use default of students.csv"
+	user_filename = STDIN.gets.chomp
+	if !user_filename.empty?
+		filename = user_filename
 	end
-	file.close
+	filename
+end
+
+def load_students
+	CSV.foreach(get_filename) do |line|
+		@name = line[0]
+		cohort = line[1]
+		add_students(@name, cohort)
+	end
+end
+
+def add_students(name, cohort)
+	@students << {:name => @name, :cohort => cohort.to_sym}
 end
 
 def save_students
-# open the file for writing students to
-file = File.open("students.csv","w")
-# iterate over the array of students
-@students.each do |student|
-	student_data = [student[:name], student[:cohort]]
-	csv_line = student_data.join(",")
-	file.puts csv_line
+	CSV.open(get_filename, "wb") do |csv|
+		@students.each do |student|
+  		csv << [student[:name], student[:cohort]]
+	end
 end
-file.close
 end
 
 try_load_students
