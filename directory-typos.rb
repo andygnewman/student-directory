@@ -33,6 +33,10 @@ def input_students
 end
 
 students = input_students # was - should be _ to call method
+if !students.empty?
 print_header
 print_students(students) # students was in {} should be print_students to reflect the method name and (students)
 print_footer(students) # was in [] should be ()
+else
+  puts "you didn't enter any student names"
+end
