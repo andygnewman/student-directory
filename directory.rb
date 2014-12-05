@@ -1,16 +1,17 @@
 @students = []
 
 def interactive_menu
-loop do
-print_menu # 1. print the menu and ask for user input
-process(gets.chomp) # 2. read the input invoke method process on the input
-end
+	loop do
+		print_menu # 1. print the menu and ask for user input
+		process(gets.chomp) # 2. read the input invoke method process on the input
+	end
 end
 
 def print_menu
 	puts "1. Input the students"
 	puts "2. Show the students"
 	puts "3. Save students to students.csv"
+	puts "4. Load students from students.csv"
 	puts "9. Exit"
 end
 
@@ -22,6 +23,8 @@ def process(selection)
 			show_students
 		when "3" # save students
 			save_students
+		when "4" # load students
+			load_students
 		when "9"
 			exit 
 		else
@@ -65,6 +68,15 @@ def input_students
 	@students
 end 
 
+def load_students
+	file = File.open("students.csv","r")
+	file.readlines.each do |line|
+		name, cohort = line.chomp.split(",")
+		@students << {:name => name, :cohort => cohort.to_sym}
+	end
+	file.close
+end
+
 def save_students
 # open the file for writing students to
 file = File.open("students.csv","w")
@@ -76,6 +88,5 @@ file = File.open("students.csv","w")
 end
 file.close
 end
-
 
 interactive_menu
