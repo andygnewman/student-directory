@@ -40,9 +40,13 @@ def process(selection)
 end
 
 def show_students
-	print_header
-	print_students_list
-	print_footer
+	if !@students.empty?
+		print_header
+		print_students_list
+		print_footer
+	else
+		puts "You don't have any student names"
+	end
 end
 
 def print_header
@@ -51,8 +55,11 @@ puts "-------------------------------------------"
 end
 
 def print_students_list
-@students.each do |student|
-	puts "#{student[:name]}, #{student[:cohort]} cohort"
+	@students.sort_by{ |x| x[:cohort]}.each.with_index(1) do |student, index|
+		# optional filters
+		# if student[:name][0].downcase == 'a'
+		# if student[:name].length < 12
+	puts "#{index}. #{student[:name].ljust(20)}, #{student[:cohort]} cohort"
 	end	
 end
 
@@ -65,9 +72,10 @@ def input_students
 	puts "To finish, just hit return twice!"
 	capture_name
 	while !@name.empty? do
-	add_students(@name, cohort = "december")
-	puts "You have entered #{@students.length} student names"
-	capture_name
+		add_students(@name, capture_cohort)
+		print "You have entered #{@students.length} student name"
+		puts @students.length != 1 ? "s" : ""
+		capture_name
 	end
 	@students
 end 
@@ -76,19 +84,28 @@ def capture_name
 	@name = STDIN.gets.chomp
 end
 
+def capture_cohort
+	puts "Please enter the cohort, or return to use december default"
+	cohort = STDIN.gets.chomp
+	if cohort.empty?
+		cohort = 'december'
+	end
+	cohort
+end
+
 def get_filename
-	filename = "students.csv"
+	filename = "students.csv" # sets default filename can be overwritten by user
 	puts "What filename would you like to use"
 	puts "just hit enter to use default of students.csv"
 	user_filename = STDIN.gets.chomp
-	if !user_filename.empty?
+	if !user_filename.empty? # if user has input something use that file name rather than the default
 		filename = user_filename
 	end
 	filename
 end
 
-def load_students
-	CSV.foreach(get_filename) do |line|
+def load_students # got stuck on trying to parse each line read in, until realised it was read as an array!
+	CSV.foreach(get_filename) do |line| # doesn't validate that user input filename exists
 		@name = line[0]
 		cohort = line[1]
 		add_students(@name, cohort)
