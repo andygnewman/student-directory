@@ -39,40 +39,12 @@ def process(selection)
 	end
 end
 
-def show_students
-	if !@students.empty?
-		print_header
-		print_students_list
-		print_footer
-	else
-		puts "You don't have any student names"
-	end
-end
-
-def print_header
-puts "The students of my cohort at Makers Academy"
-puts "-------------------------------------------"	
-end
-
-def print_students_list
-	@students.sort_by{ |x| x[:cohort]}.each.with_index(1) do |student, index|
-		# optional filters
-		# if student[:name][0].downcase == 'a'
-		# if student[:name].length < 12
-	puts "#{index}. #{student[:name].ljust(20)}, #{student[:cohort]} cohort"
-	end	
-end
-
-def print_footer 
-puts "Overall we have #{@students.length} great students"
-end
-
 def input_students
 	puts "Please enter the names of the students"
 	puts "To finish, just hit return twice!"
 	capture_name
 	while !@name.empty? do
-		add_students(@name, capture_cohort)
+		add_students(@name, capture_cohort, capture_country)
 		print "You have entered #{@students.length} student name"
 		puts @students.length != 1 ? "s" : ""
 		capture_name
@@ -93,6 +65,64 @@ def capture_cohort
 	cohort
 end
 
+def capture_country
+	puts "Please enter the student's country, or return to use UK default"
+	country = STDIN.gets.chomp
+	if country.empty?
+		country = 'UK'
+	end
+	country
+end
+
+def add_students(name, cohort, country)
+	@students << {:name => @name, :cohort => cohort.to_sym, :country => country}
+end
+
+def show_students
+	if !@students.empty?
+		print_header
+		print_students_list
+		print_footer
+	else
+		puts "You don't have any student names"
+	end
+end
+
+def print_header
+puts "The students of my cohort at Makers Academy"
+puts "-------------------------------------------"	
+end
+
+def print_students_list
+	@students.sort_by{ |x| x[:cohort]}.each.with_index(1) do |student, index|
+		# optional filters
+		# if student[:name][0].downcase == 'a'
+		# if student[:name].length < 12
+	puts "#{index}. #{student[:name].ljust(20)}, #{student[:cohort]} cohort, from #{student[:country]}"
+	end	
+end
+
+def print_footer 
+puts "Overall we have #{@students.length} great students"
+end
+
+def load_students # got stuck on trying to parse each line read in, until realised it was read as an array!
+	CSV.foreach(get_filename) do |line| # doesn't validate that user input filename exists
+		@name = line[0]
+		cohort = line[1]
+		country = line[2]
+		add_students(@name, cohort, country)
+	end
+end
+
+def save_students
+	CSV.open(get_filename, "wb") do |csv|
+		@students.each do |student|
+  		csv << [student[:name], student[:cohort], student[:country]]
+	end
+end
+end
+
 def get_filename
 	filename = "students.csv" # sets default filename can be overwritten by user
 	puts "What filename would you like to use"
@@ -102,26 +132,6 @@ def get_filename
 		filename = user_filename
 	end
 	filename
-end
-
-def load_students # got stuck on trying to parse each line read in, until realised it was read as an array!
-	CSV.foreach(get_filename) do |line| # doesn't validate that user input filename exists
-		@name = line[0]
-		cohort = line[1]
-		add_students(@name, cohort)
-	end
-end
-
-def add_students(name, cohort)
-	@students << {:name => @name, :cohort => cohort.to_sym}
-end
-
-def save_students
-	CSV.open(get_filename, "wb") do |csv|
-		@students.each do |student|
-  		csv << [student[:name], student[:cohort]]
-	end
-end
 end
 
 try_load_students
